@@ -5,7 +5,7 @@ class UploadHelper
     private $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
     private $uploadDir;
 
-    public function __construct($uploadDir = __DIR__ . '/../uploads/product_image/')
+    public function __construct($uploadDir = __DIR__ . '/../uploads/')
     {
         $this->uploadDir = $uploadDir;
 
@@ -14,7 +14,7 @@ class UploadHelper
         }
     }
 
-    public function upload($file)
+    public function upload($file, $path)
     {
         if (isset($file) && $file['error'] === UPLOAD_ERR_OK) {
             $fileTmpPath = $file['tmp_name'];
@@ -27,7 +27,7 @@ class UploadHelper
             }
 
             $newFileName = md5(time() . $fileName) . '.' . $fileExtension;
-            $destPath = $this->uploadDir . $newFileName;
+            $destPath = $this->uploadDir . $path . '/' . $newFileName;
 
             if (move_uploaded_file($fileTmpPath, $destPath)) {
                 return $newFileName;
@@ -39,9 +39,9 @@ class UploadHelper
         }
     }
 
-    public function delete($fileName)
+    public function delete($fileName, $path)
     {
-        $filePath = $this->uploadDir . $fileName;
+        $filePath = $this->uploadDir . $path . '/' . $fileName;
 
         if (file_exists($filePath)) {
             unlink($filePath);

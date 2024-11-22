@@ -15,6 +15,63 @@ class Product
         $this->uploadHelper = new UploadHelper();
     }
 
+    public function searchs(string $searchTerm): array
+    {
+        $searchTerm = '%' . $searchTerm . '%'; // Add wildcards for partial matching
+        $query = "SELECT * FROM products WHERE name LIKE :searchTerm LIKE :searchTerm";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':searchTerm', $searchTerm);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function search($query, $limit, $offset)
+    {
+        $query = '%' . $query . '%';
+        $sql = "SELECT * FROM products WHERE name LIKE :query LIMIT :limit OFFSET :offset";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':query', $query, PDO::PARAM_STR);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function getSearchCount($query)
+    {
+        $query = '%' . $query . '%';
+        $sql = "SELECT COUNT(*) AS total FROM products WHERE name LIKE :query";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bindValue(':query', $query, PDO::PARAM_STR);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'];
+    }
+
+    public function getCount()
+    {
+        $query = "SELECT COUNT(*) AS total FROM products";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result['total'];
+    }
+
+    public function getPaginated($limit, $offset)
+    {
+        $query = "SELECT products.*, categories.name AS category_name
+                  FROM products
+                  LEFT JOIN categories ON products.category_id = categories.id
+                  LIMIT :limit OFFSET :offset";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+        $stmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
     public function getAll()
     {
         $query = "SELECT * FROM " . $this->table;
@@ -32,16 +89,31 @@ class Product
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
-    public function create($name, $price)
+    public function getByIds($id)
+    {
+        $query = "SELECT products.*, categories.name AS category_name
+              FROM " . $this->table . "
+              LEFT JOIN categories ON products.category_id = categories.id
+              WHERE products.id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+
+    public function create($name, $price, $quantity, $categoryId)
     {
         try {
-            $imageName = $this->uploadHelper->upload($_FILES['image']);
+            $imageName = $this->uploadHelper->upload($_FILES['image'], 'product_image');
 
-            $query = "INSERT INTO " . $this->table . " (name, price, image) VALUES (:name, :price, :image)";
+            $query = "INSERT INTO products (name, price, quantity, image, category_id) VALUES (:name, :price, :quantity, :image, :category_id)";
             $stmt = $this->conn->prepare($query);
             $stmt->bindParam(':name', $name);
             $stmt->bindParam(':price', $price);
+            $stmt->bindParam(':quantity', $quantity);
             $stmt->bindParam(':image', $imageName);
+            $stmt->bindParam(':category_id', $categoryId);
             return $stmt->execute();
         } catch (Exception $e) {
             echo "Error: " . $e->getMessage();
@@ -49,32 +121,20 @@ class Product
         }
     }
 
-    public function update($id, $name, $price)
+    public function update($id, $name, $price, $quantity, $categoryId)
     {
-        $query = "UPDATE " . $this->table . " SET name = :name, price = :price";
-        $params = [
-            ':id' => $id,
-            ':name' => $name,
-            ':price' => $price
-        ];
+        $query = "UPDATE products 
+              SET name = :name, price = :price, quantity = :quantity, category_id = :category_id
+              WHERE id = :id";
 
-        if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-            try {
-                $newFileName = $this->uploadHelper->upload($_FILES['image']);
-                $query .= ", image = :image";
-                $params[':image'] = $newFileName;
-
-                $this->deleteImageFile($id);
-            } catch (Exception $e) {
-                echo "Error: " . $e->getMessage();
-                return false;
-            }
-        }
-
-        $query .= " WHERE id = :id";
         $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->bindParam(':name', $name);
+        $stmt->bindParam(':price', $price);
+        $stmt->bindParam(':quantity', $quantity);
+        $stmt->bindParam(':category_id', $categoryId, PDO::PARAM_INT);
 
-        return $stmt->execute($params);
+        return $stmt->execute();
     }
 
     public function delete($id)
@@ -91,7 +151,7 @@ class Product
     {
         $product = $this->getById($id);
         if ($product && !empty($product['image']) && file_exists(__DIR__ . '/../uploads/product_image/' . $product['image'])) {
-            $this->uploadHelper->delete($product['image']);
+            $this->uploadHelper->delete($product['image'], 'product_image');
         }
     }
 }
