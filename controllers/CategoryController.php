@@ -27,13 +27,6 @@ class CategoryController
         require 'views/categories/index.php';
     }
 
-
-    public function show(int $id)
-    {
-        $category = $this->categoryModel->getById($id);
-        require 'views/categories/show.php';
-    }
-
     public function create()
     {
         require 'views/categories/create.php';

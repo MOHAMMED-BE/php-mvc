@@ -13,36 +13,29 @@ class ProductController
 
     public function index()
     {
-        $itemsPerPage = 4; // Items per page
-        $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1; // Current page from query
+        $categoryModel = new Category();
+        $categories = $categoryModel->getAll();
+
+        $itemsPerPage = 4;
+        $currentPage = isset($_GET['page']) ? (int)$_GET['page'] : 1;
         $offset = ($currentPage - 1) * $itemsPerPage;
 
-        // Check if there's a search query
         $searchQuery = isset($_GET['search']) ? trim($_GET['search']) : '';
 
-        // Get total items and paginated items
         $productModel = new Product();
 
         if ($searchQuery !== '') {
-            $totalItems = $productModel->getSearchCount($searchQuery); // Count matching products
-            $products = $productModel->search($searchQuery, $itemsPerPage, $offset); // Fetch matching products
+            $totalItems = $productModel->getSearchCount($searchQuery);
+            $products = $productModel->search($searchQuery, $itemsPerPage, $offset);
         } else {
-            $totalItems = $productModel->getCount(); // Total number of products
-            $products = $productModel->getPaginated($itemsPerPage, $offset); // Fetch paginated products
+            $totalItems = $productModel->getCount();
+            $products = $productModel->getPaginated($itemsPerPage, $offset);
         }
 
-        // Generate pagination HTML
         $baseUrl = 'index.php?product/index' . ($searchQuery !== '' ? '&search=' . urlencode($searchQuery) : '');
         $paginationHtml = PaginationHelper::paginate($totalItems, $itemsPerPage, $currentPage, $baseUrl);
 
         require 'views/products/index.php';
-    }
-
-
-    public function show(int $id)
-    {
-        $product = $this->productModel->getById($id);
-        require 'views/products/show.php';
     }
 
     public function create()

@@ -7,14 +7,14 @@ class PaginationHelper
         $totalPages = ceil($totalItems / $itemsPerPage);
         $paginationHtml = '<nav><ul class="pagination justify-content-start">';
 
-        // Previous Button
+        //% Previous Button
         $previousPage = max(1, $currentPage - 1);
         $disabledPrev = $currentPage == 1 ? 'disabled' : '';
         $paginationHtml .= '<li class="page-item ' . $disabledPrev . '">';
         $paginationHtml .= '<a class="page-link" href="' . $baseUrl . '&page=' . $previousPage . '">Previous</a>';
         $paginationHtml .= '</li>';
 
-        // Page Numbers
+        //% Page Numbers
         for ($i = 1; $i <= $totalPages; $i++) {
             $active = $i == $currentPage ? 'active' : '';
             $paginationHtml .= '<li class="page-item ' . $active . '">';
@@ -22,7 +22,7 @@ class PaginationHelper
             $paginationHtml .= '</li>';
         }
 
-        // Next Button
+        //% Next Button
         $nextPage = min($totalPages, $currentPage + 1);
         $disabledNext = $currentPage == $totalPages ? 'disabled' : '';
         $paginationHtml .= '<li class="page-item ' . $disabledNext . '">';

@@ -10,6 +10,35 @@
 <body>
 
     <div class="container mt-5">
+        <div class="row mb-3">
+            <div class="col-4">
+                <form method="GET" action="index.php" class="d-flex">
+                    <select name="category" class="form-select me-3" style="max-width: 200px;">
+                        <option value="">Select Category</option>
+                        <?php
+                        foreach ($categories as $category) {
+                            echo "<option value='{$category['id']}'>{$category['name']}</option>";
+                        }
+                        ?>
+                    </select>
+                </form>
+            </div>
+            <div class="col-8">
+                <form method="GET" action="index.php" class="d-flex">
+                    <input type="hidden" name="product/index" value="">
+                    <input
+                        type="text"
+                        name="search"
+                        class="form-control me-2"
+                        placeholder="Search products..."
+                        value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
+                    <button type="submit" class="btn btn-warning btn-search">Search</button>
+                </form>
+            </div>
+
+
+        </div>
+
         <table class="table">
             <thead class="table-dark">
                 <tr>

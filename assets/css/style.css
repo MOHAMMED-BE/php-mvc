@@ -62,7 +62,7 @@ body,
 /* Style the top header section */
 .top-header {
     background-color: #fff !important;
-    padding: 13px 85px 13px 75px !important;
+    padding: 13px 0 13px 0 !important;
     box-shadow: 0 13px 11px #0011330a !important;
 }
 
@@ -125,3 +125,16 @@ table {
     pointer-events: none;
     background-color: transparent;
 }
+
+
+/* Search */
+
+.btn-search {
+    background-color: #0e7ea7 !important;
+    color: #fff !important;
+    border: none !important;
+}
+
+/* #productTable .sidebar {
+    display: none !important
+} */

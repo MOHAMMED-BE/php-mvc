@@ -1,14 +1,15 @@
 <?php
-// Autoload controller classes
+
+session_start();
+
+
 spl_autoload_register(function ($class_name) {
-    // Look for the class in the controllers directory
     $controllerPath = 'controllers/' . $class_name . '.php';
     if (file_exists($controllerPath)) {
         include $controllerPath;
         return;
     }
 
-    // Look for the class in the helpers directory
     $helperPath = 'helpers/' . $class_name . '.php';
     if (file_exists($helperPath)) {
         include $helperPath;
@@ -18,7 +19,12 @@ spl_autoload_register(function ($class_name) {
     throw new Exception("Class $class_name not found in controllers or helpers.");
 });
 
+
 require_once 'Router.php';
+require_once 'models/Category.php';
+
+$categoryModel = new Category();
+$categories = $categoryModel->getAll();
 
 $url = $_SERVER['REQUEST_URI'];
 $parsedUrl = parse_url($url);
@@ -27,6 +33,8 @@ $route = explode('&', $route)[0];
 
 $routeDisplay = str_replace(['/', '_'], ' / ', $route);
 $routeDisplay = ucwords(str_replace(['product', 'category', 'index'], ['Product', 'Category', 'List'], $routeDisplay));
+
+
 ?>
 
 <!DOCTYPE html>
@@ -51,7 +59,7 @@ $routeDisplay = ucwords(str_replace(['product', 'category', 'index'], ['Product'
                         <img src="assets/media/icon.png" alt="" class="side-img">
                     </div>
                     <div class="col-7">
-                        <h5> Sidemenus</h5>
+                        <h5> MVC DASH</h5>
                     </div>
                 </div>
             </div>
@@ -78,31 +86,24 @@ $routeDisplay = ucwords(str_replace(['product', 'category', 'index'], ['Product'
                 </li>
             </ul>
             <div class="mtauto p-3 text-center user-profile">
-                <a href="#" class="text-white">
-                    <i class="bi bi-person-circle"></i> User Profile
+                <a href="<?php echo isset($_SESSION['user']) ? 'index.php?user/logout' : 'index.php?user/login' ?>" class="text-white <?php echo ($route ?? '') === 'user/login' ? 'active' : ''; ?>">
+                    <i class="bi bi-person-circle"></i>
+                    <?php echo  isset($_SESSION['user'])  ? $_SESSION['username'] . ' | Logout' : 'Login'; ?>
                 </a>
+
             </div>
         </div>
 
         <div class="flex-grow-1">
             <div class="top-header d-flex justify-content-between align-items-center  bg-light">
-                <h5><?php echo htmlspecialchars($routeDisplay); ?></h5>
-
-                <?php if ($route === 'product/index'): ?>
-                    <form method="GET" action="index.php" class="d-flex">
-                        <input type="hidden" name="product/index" value="">
-                        <input
-                            type="text"
-                            name="search"
-                            class="form-control me-2"
-                            placeholder="Search products..."
-                            value="<?php echo isset($_GET['search']) ? htmlspecialchars($_GET['search']) : ''; ?>">
-                        <button type="submit" class="btn btn-primary">Search</button>
-                    </form>
-                <?php endif; ?>
+                <div class="container py-2">
+                    <div class="row">
+                        <h5><?php echo htmlspecialchars($routeDisplay); ?></h5>
+                    </div>
+                </div>
             </div>
 
-            <div class="p-4">
+            <div class="container">
                 <?php
                 $router = new Router();
                 $router->dispatch();
@@ -112,6 +113,7 @@ $routeDisplay = ucwords(str_replace(['product', 'category', 'index'], ['Product'
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="assets/js/validate.js"></script>
 </body>
 
 </html>

@@ -1,3 +1,9 @@
+<?php
+if (!isset($_SESSION['user'])) {
+    header('Location: index.php?user/login');
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -50,7 +56,6 @@
         </form>
     </div>
 
-    <script src="js/validate.js"></script>
 </body>
 
 </html>

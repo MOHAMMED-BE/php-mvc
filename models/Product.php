@@ -15,18 +15,6 @@ class Product
         $this->uploadHelper = new UploadHelper();
     }
 
-    public function searchs(string $searchTerm): array
-    {
-        $searchTerm = '%' . $searchTerm . '%'; // Add wildcards for partial matching
-        $query = "SELECT * FROM products WHERE name LIKE :searchTerm LIKE :searchTerm";
-
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(':searchTerm', $searchTerm);
-        $stmt->execute();
-
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-
     public function search($query, $limit, $offset)
     {
         $query = '%' . $query . '%';
