@@ -55,10 +55,10 @@ $routeDisplay = ucwords(str_replace(['product', 'category', 'index'], ['Product'
         <div class="sidebar bg-dark text-white d-flex flex-column">
             <div class="sidebar-header p-3 text-center">
                 <div class="row">
-                    <div class="col-4 pe-0">
+                    <div class="col-3 pe-0">
                         <img src="assets/media/icon.png" alt="" class="side-img">
                     </div>
-                    <div class="col-7">
+                    <div class="col-9">
                         <h5> MVC DASH</h5>
                     </div>
                 </div>
